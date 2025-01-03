@@ -4,7 +4,7 @@ import "sync"
 
 // Map manipulates a slice and transforms it to a slice of another type.
 // `iteratee` is call in parallel. Result keep the same order.
-func Map[T any, R any](collection []T, iteratee func(T, int) R) []R {
+func Map[T any, R any](collection []T, iteratee func(item T, index int) R) []R {
 	result := make([]R, len(collection))
 
 	var wg sync.WaitGroup
@@ -27,7 +27,7 @@ func Map[T any, R any](collection []T, iteratee func(T, int) R) []R {
 
 // ForEach iterates over elements of collection and invokes iteratee for each element.
 // `iteratee` is call in parallel.
-func ForEach[T any](collection []T, iteratee func(T, int)) {
+func ForEach[T any](collection []T, iteratee func(item T, index int)) {
 	var wg sync.WaitGroup
 	wg.Add(len(collection))
 
@@ -44,7 +44,7 @@ func ForEach[T any](collection []T, iteratee func(T, int)) {
 // Times invokes the iteratee n times, returning an array of the results of each invocation.
 // The iteratee is invoked with index as argument.
 // `iteratee` is call in parallel.
-func Times[T any](count int, iteratee func(int) T) []T {
+func Times[T any](count int, iteratee func(index int) T) []T {
 	result := make([]T, count)
 
 	var wg sync.WaitGroup
@@ -67,8 +67,8 @@ func Times[T any](count int, iteratee func(int) T) []T {
 
 // GroupBy returns an object composed of keys generated from the results of running each element of collection through iteratee.
 // `iteratee` is call in parallel.
-func GroupBy[T any, U comparable](collection []T, iteratee func(T) U) map[U][]T {
-	result := map[U][]T{}
+func GroupBy[T any, U comparable, Slice ~[]T](collection Slice, iteratee func(item T) U) map[U]Slice {
+	result := map[U]Slice{}
 
 	var mu sync.Mutex
 	var wg sync.WaitGroup
@@ -96,8 +96,8 @@ func GroupBy[T any, U comparable](collection []T, iteratee func(T) U) map[U][]T 
 // determined by the order they occur in collection. The grouping is generated from the results
 // of running each element of collection through iteratee.
 // `iteratee` is call in parallel.
-func PartitionBy[T any, K comparable](collection []T, iteratee func(x T) K) [][]T {
-	result := [][]T{}
+func PartitionBy[T any, K comparable, Slice ~[]T](collection Slice, iteratee func(item T) K) []Slice {
+	result := []Slice{}
 	seen := map[K]int{}
 
 	var mu sync.Mutex
